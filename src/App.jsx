@@ -4,17 +4,16 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Header from './header'
 import ProdList from './product-list'
-import Filter from './filter'
 
 function App() {
-  // const [count, setCount] = useState(0)
+  const [search, setSearch] = useState('')
 
   return (
     <>
-      <Header />
-      <main className='flex gap-5 p-5'>
-        <Filter />
-        <ProdList />
+      <Header search={search} setSearch={setSearch} />
+      <main className='flex gap-5 p-5 max-w-7xl m-auto'>
+        
+        <ProdList search={search}/>
 
       </main>
     </>
