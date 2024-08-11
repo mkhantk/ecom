@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
 const Header = ({ search, setSearch }) => {
-    // const [search, setSearch] = useState('')
+    
 
     function handleSearch(e) {
         // console.log(e.target.value)
