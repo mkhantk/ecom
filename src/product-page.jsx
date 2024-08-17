@@ -1,14 +1,23 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar, FaPlus, FaMinus, FaHeart } from "react-icons/fa";
 import { useParams } from "react-router-dom";
+import { ProductContext } from "./productContext";
 
 
-const ProdPage = ({ allData }) => {
+const ProdPage = () => {
+    const {allData, product, setProduct, wishlistCount, setWishlistCount, wishlist, setWishlist, cartCount, setCartCount, cart, setCart} = useContext(ProductContext) //from context
+
     const {productId} = useParams()
-    const [product, setProduct] = useState(null)
+    
     const ratingStar = []
-    const [count, setCount] = useState(1)
-    const [favorite, setFavorite] = useState(<FaRegHeart id="regHeart" className="text-gray-400 text-3xl m-2 hover:text-red-500" />)
+    const [shopCount, setShopCount] = useState(1)
+    const [favorite, setFavorite] = useState(() => {
+        if (wishlist.includes(Number(productId))) {
+            return <FaHeart className="text-red-500 text-3xl m-2 "/>
+        } else {
+            return <FaRegHeart id="regHeart" className="text-gray-400 text-3xl m-2 hover:text-red-500" />
+        } 
+    })
 
     useEffect(() => {
         const productData = allData.find(item => item.id === Number(productId))
@@ -27,21 +36,21 @@ const ProdPage = ({ allData }) => {
     } else {
         for (let i = 0; i < 5; i++) {
             if (i < Math.floor(product.rating)) {
-                ratingStar.push(<FaStar />)
+                ratingStar.push(<FaStar key={i}/>)
             } else if ( i < product.rating) {
-                ratingStar.push(<FaStarHalfAlt />)
+                ratingStar.push(<FaStarHalfAlt key={i}/>)
             } else {
-                ratingStar.push(<FaRegStar />)
+                ratingStar.push(<FaRegStar key={i}/>)
             }
         }
     }
 
     function handleClick(e) {
         // console.log(e.currentTarget.id)
-        if (e.currentTarget.id === 'minus' && count > 1) {
-            setCount(prevCount => prevCount - 1)
+        if (e.currentTarget.id === 'minus' && shopCount > 1) {
+            setShopCount(prevShopCount => prevShopCount - 1)
         } else if (e.currentTarget.id === 'plus') {
-            setCount(prevCount => prevCount + 1)
+            setShopCount(prevShopCount => prevShopCount + 1)
         }
     }
     //favorite lok tae hr mr lok ya mr ka faorite lok lk yin, header ka favorite mr twr paw ya ml, 
@@ -49,15 +58,41 @@ const ProdPage = ({ allData }) => {
     //both of them are able to add and delete by clicking 
     //and don't forget about the count before add to cart.
 
+    //so where do we start with? 
+    // 1st
+    //2nd
+    //3rd
+
     function handleHeart(e) {
         // console.log(e.currentTarget.firstChild.id)
+        
         if (e.currentTarget.firstChild.id === 'regHeart') {
             setFavorite(<FaHeart className="text-red-500 text-3xl m-2 "/>)
+            if (!wishlist.includes(product.id) ) {
+                setWishlist(prevWishlist => [...prevWishlist, product.id])
+                setWishlistCount(prevWishlistCount => prevWishlistCount + 1)
+            }
         } else {
             setFavorite(<FaRegHeart id="regHeart" className="text-gray-400 text-3xl m-2 hover:text-red-500" />) 
+            if (wishlist.includes(product.id)) {
+                setWishlist(prevWishlist => prevWishlist.filter(id => id !== product.id))
+                setWishlistCount(prevWishlistCount => prevWishlistCount - 1)
+            }
         }
+
+
     }
-    //change the rating to stars
+    //cart
+    function handleCart (e) {
+        
+            // click nake yin cart a thit tor ya ma
+            //p yin count lel htwk ya ml
+            if (!cart.includes(product.id)) {
+                setCart(prevCart => [...prevCart, product.id])
+                setCartCount(prevCartCount => prevCartCount + 1);
+
+            }
+    }
 
     
     return(
@@ -73,10 +108,11 @@ const ProdPage = ({ allData }) => {
                     <div className="flex gap-3 mt-auto">
                         <div className="flex gap-5 ring-1 p-2 rounded-lg hover:ring-red-500">
                             <button id="minus" onClick={handleClick}><FaMinus /></button>
-                            <p>{count}</p>
+                            <p>{shopCount}</p>
                             <button id="plus" onClick={handleClick}><FaPlus /></button>
                         </div>
-                        <button className="p-1 px-2 text-lg bg-red-500 rounded-lg hover:bg-gray-200 hover:text-red-500 hover:ring-1 ring-red-500">add to cart</button>
+                        <button className="p-1 px-2 text-lg bg-red-500 rounded-lg hover:bg-gray-200 hover:text-red-500 hover:ring-1 ring-red-500"
+                            onClick={handleCart}>add to cart</button>
                         <button onClick={handleHeart}>{favorite}</button>
                     </div>
                 </div>

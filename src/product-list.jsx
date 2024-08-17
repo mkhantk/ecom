@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ProductContext, ProductProvider } from "./productContext";
 
 
 
@@ -12,8 +13,10 @@ function getData4Page(array, dataSize)  {
     return data4Page;
 }
 
-const ProdList = ({ search, allData, setAllData }) => {
-    // const [allData, setAllData] = useState([])
+const ProdList = () => {
+   
+
+    const { search, allData, setAllData} = useContext(ProductContext)
     const [data, setData] = useState([])
     const [page, setPage] = useState(1)
     const itemsPerPage = 40;
@@ -56,7 +59,7 @@ const ProdList = ({ search, allData, setAllData }) => {
                     }
                 }
 
-                console.log(categories)
+                // console.log(categories)
 
                 if (search !== '') {
                     filteredData = filteredData.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
@@ -108,8 +111,8 @@ const ProdList = ({ search, allData, setAllData }) => {
                     // let filtered = filteredData[0].price.slice(0,1)
                     // console.log(filtered)
                     // console.log(filteredData[0].price.slice(1))
-                    console.log(minPrice)
-                    console.log(maxPrice)
+                    // console.log(minPrice)
+                    // console.log(maxPrice)
                     //what i want to do is that i want to match the value of item price and min or max price
                     
 
@@ -133,9 +136,9 @@ const ProdList = ({ search, allData, setAllData }) => {
 
     const totalPages = data.length
 
-    console.log(stock)
-    console.log(data)
-    console.log(totalPages)
+    // console.log(stock)
+    // console.log(data)
+    // console.log(totalPages)
     // let categories = []
     // for (let i = 0; i < data.length; i++ ) {
     //     if (!categories.includes(data[i].category)) {
