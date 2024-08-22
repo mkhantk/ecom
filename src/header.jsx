@@ -32,8 +32,10 @@ const Header = () => {
                         </Link>
                     </li>
                     <li>
-                        <FaShoppingCart className="text-2xl"/> 
-                        <div className="bg-red-500 px-2 rounded-full absolute top-4 right-4 text-white ">{cartCount}</div>
+                        <Link to={'/cart'}>
+                            <FaShoppingCart className="text-2xl"/>
+                            <div className="bg-red-500 px-2 rounded-full absolute top-4 right-4 text-white ">{cartCount}</div>
+                        </Link>
                     </li>
                 </nav>
             </header>

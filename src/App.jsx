@@ -6,7 +6,7 @@ import ProdPage from './product-page'
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom'
 import { ProductProvider } from './productContext'
 import Wishlist from './wishlist'
-import cart from './cart' 
+import Cart from './cart' 
 
 
 function App() {
@@ -25,6 +25,7 @@ function App() {
               <Route path='/' element={<ProdList />} />
               <Route path='/product-page/:productId' element={<ProdPage   />} />
               <Route path='/wishlist' element={<Wishlist />}/>
+              <Route path='/cart' element={<Cart />} />
         
             </Routes>
           </main>

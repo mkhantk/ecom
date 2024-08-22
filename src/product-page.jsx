@@ -5,12 +5,12 @@ import { ProductContext } from "./productContext";
 
 
 const ProdPage = () => {
-    const {allData, product, setProduct, wishlistCount, setWishlistCount, wishlist, setWishlist, cartCount, setCartCount, cart, setCart} = useContext(ProductContext) //from context
+    const {allData, product, setProduct, wishlistCount, setWishlistCount, wishlist, setWishlist, cartCount, setCartCount, cart, setCart, shopCount, setShopCount} = useContext(ProductContext) //from context
 
     const {productId} = useParams()
     
     const ratingStar = []
-    const [shopCount, setShopCount] = useState(1)
+    // const [shopCount, setShopCount] = useState(1)
     const [favorite, setFavorite] = useState(() => {
         if (wishlist.includes(Number(productId))) {
             return <FaHeart className="text-red-500 text-3xl m-2 "/>
@@ -46,12 +46,26 @@ const ProdPage = () => {
     }
 
     function handleClick(e) {
-        // console.log(e.currentTarget.id)
-        if (e.currentTarget.id === 'minus' && shopCount > 1) {
-            setShopCount(prevShopCount => prevShopCount - 1)
-        } else if (e.currentTarget.id === 'plus') {
-            setShopCount(prevShopCount => prevShopCount + 1)
-        }
+        console.log(e.currentTarget.id)
+        let id = e.currentTarget.id
+        setShopCount(prevShopCount => {
+            const currentCount = prevShopCount[product.id] || 1
+
+            if (id === 'minus' && currentCount > 1) {
+                return {...prevShopCount, [product.id]: currentCount - 1}
+            } else if (id === 'plus') {
+                return {...prevShopCount, [product.id]: currentCount + 1}
+            } else {
+                return prevShopCount;
+            }
+        })
+
+        // console.log(shopCount)
+        // if (e.currentTarget.id === 'minus' && (shopCount[productId] || 1) > 1) {
+        //     setShopCount(prevShopCount => prevShopCount[productId] - 1)
+        // } else if (e.currentTarget.id === 'plus') {
+        //     setShopCount(prevShopCount => prevShopCount[productId] + 1)
+        // }
     }
     //favorite lok tae hr mr lok ya mr ka faorite lok lk yin, header ka favorite mr twr paw ya ml, 
     //ae lo fik pho a twk so, header nae product page ko props nae connect lok ya ml, pe yin, create another two component(wishlist, cart)
@@ -75,7 +89,7 @@ const ProdPage = () => {
         } else {
             setFavorite(<FaRegHeart id="regHeart" className="text-gray-400 text-3xl m-2 hover:text-red-500" />) 
             if (wishlist.includes(product.id)) {
-                setWishlist(prevWishlist => prevWishlist.filter(id => id !== product.id))
+                setWishlist(prevWishlist => prevWishlist.filter(id => id !== Number(product.id)))
                 setWishlistCount(prevWishlistCount => prevWishlistCount - 1)
             }
         }
@@ -90,8 +104,18 @@ const ProdPage = () => {
             if (!cart.includes(product.id)) {
                 setCart(prevCart => [...prevCart, product.id])
                 setCartCount(prevCartCount => prevCartCount + 1);
+                // setShopCount(prevShopCount => {
+                //     if (!prevShopCount[product.id]) {
+                //         return {...prevShopCount, [product.id]: 1}
+                //     }
+                // })
+                setShopCount(prevShopCount => {
+                    const newCount = prevShopCount[product.id] ? prevShopCount[product.id] : 1;
+                    return { ...prevShopCount, [product.id]: newCount };
+                });
 
             }
+            // console.log(cart)
     }
 
     
@@ -108,7 +132,7 @@ const ProdPage = () => {
                     <div className="flex gap-3 mt-auto">
                         <div className="flex gap-5 ring-1 p-2 rounded-lg hover:ring-red-500">
                             <button id="minus" onClick={handleClick}><FaMinus /></button>
-                            <p>{shopCount}</p>
+                            <p>{shopCount[product.id] || 1} </p>
                             <button id="plus" onClick={handleClick}><FaPlus /></button>
                         </div>
                         <button className="p-1 px-2 text-lg bg-red-500 rounded-lg hover:bg-gray-200 hover:text-red-500 hover:ring-1 ring-red-500"
