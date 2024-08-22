@@ -46,7 +46,7 @@ const ProdPage = () => {
     }
 
     function handleClick(e) {
-        console.log(e.currentTarget.id)
+        // console.log(e.currentTarget.id)
         let id = e.currentTarget.id
         setShopCount(prevShopCount => {
             const currentCount = prevShopCount[product.id] || 1
