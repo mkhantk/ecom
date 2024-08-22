@@ -16,7 +16,7 @@ const Header = () => {
         <>
             <header className="flex gap-5 justify-end items-center py-5 bg-green-600 bg-opacity-20 mb-5 px-8">
                 <Link to='/'>
-                    <h1 className="logo mr-auto text-5xl font-bold">Ecom</h1>
+                    <h1 className="logo mr-auto text-5xl font-bold hover:text-red-500">Ecom</h1>
                 </Link>
                 <div className="relative flex justify-center items-center m-auto">
                     <input type="search" name="" id="search" className="mr-auto rounded-full px-5 py-1 indent-2" onChange={handleSearch}/>  
