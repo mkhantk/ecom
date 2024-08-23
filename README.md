@@ -1,4 +1,4 @@
-##Ecom project. 
+## Ecom project. 
 
 this is the project that i built with react and tailwind to practice my frontend skills.
 
