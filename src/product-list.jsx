@@ -48,7 +48,7 @@ const ProdList = () => {
 
     
     useEffect(() => {
-        fetch('../MOCK_DATA.json')
+        fetch('/ecom/MOCK_DATA.json')
             .then(response => response.json())
             .then(data => {
                 let filteredData = data; 
