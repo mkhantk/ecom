@@ -1,6 +1,6 @@
 ## Ecom project.
 
-![desktop view] (/src/assets/Screenshot.png)
+![desktop view](/src/assets/Screenshot.png)
 
 this is the project that i built with react and tailwind to practice my frontend skills.
 
