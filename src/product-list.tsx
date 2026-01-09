@@ -1,8 +1,26 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, useMemo } from "react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaBars } from "react-icons/fa";
-import { ProductContext, ProductProvider } from "./productContext";
+import { FaArrowUp, FaFilter } from "react-icons/fa";
+import { ProductContext } from "./productContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+
+export interface Product {
+	id: number;
+	name: string;
+	description: string;
+	price: string;
+	category: string;
+	image: string;
+	rating: number;
+	inStock: boolean;
+}
+export const fetchProduct = async (): Promise<Product[]> => {
+	const response = await axios.get("./MOCK_DATA.json");
+
+	return response.data;
+};
 
 function getData4Page(array, dataSize) {
 	const data4Page = [];
@@ -14,135 +32,108 @@ function getData4Page(array, dataSize) {
 
 const ProdList = () => {
 	const { search, allData, setAllData } = useContext(ProductContext);
-	const [data, setData] = useState([]);
-	const [page, setPage] = useState(1);
+	// const [data, setData] = useState([]);
+	const [page, setPage] = useState<number>(1);
 	const itemsPerPage = 40;
 	//filters
-	const [stock, setStock] = useState(false);
-	const [minPrice, setMinPirce] = useState("");
-	const [maxPrice, setMaxPrice] = useState("");
+	const [stock, setStock] = useState<boolean>(false);
+	const [minPrice, setMinPirce] = useState<number | "">("");
+	const [maxPrice, setMaxPrice] = useState<number | "">("");
 
 	//category
-	const [toy, setToy] = useState(false);
-	const [cloth, setCloth] = useState(false);
-	const [beauty, setBeauty] = useState(false);
-	const [elect, setElect] = useState(false);
-	const [home, setHome] = useState(false);
+	const [toy, setToy] = useState<boolean>(false);
+	const [cloth, setCloth] = useState<boolean>(false);
+	const [beauty, setBeauty] = useState<boolean>(false);
+	const [elect, setElect] = useState<boolean>(false);
+	const [home, setHome] = useState<boolean>(false);
 
 	//for product page
 	const divRef = useRef({});
-	// const [productPage, setProductPage] = useState({
-	//     productId: '',
-	//     name: '',
-	//     description:'',
-	//     price: '',
-	//     category:'',
-	//     image:'',
-	//     rating:'',
-	//     inStock: ''
-	// })
+
 	const [filter, setFilter] = useState(true);
 
+	const [scroll, setScroll] = useState(false);
+
 	useEffect(() => {
-		fetch("/ecom/MOCK_DATA.json")
-			.then((response) => response.json())
-			.then((data) => {
-				let filteredData = data;
-				let categories = [];
-				for (let i = 0; i < filteredData.length; i++) {
-					if (!categories.includes(filteredData[i].category)) {
-						categories.push(filteredData[i].category);
-					}
-				}
+		let isScrolling = false;
+		function onScroll() {
+			if (!isScrolling) {
+				isScrolling = true;
+				requestAnimationFrame(() => {
+					setScroll(window.scrollY > 50);
+					isScrolling = false;
+				});
+			}
+		}
+		window.addEventListener("scroll", onScroll, { passive: true });
+		onScroll();
+		return () => window.removeEventListener("scroll", onScroll);
+	});
 
-				// console.log(categories)
+	// this is the current version using tan satack query for data fetching and handling async.
+	const queryClient = useQueryClient();
+	const { data, error } = useQuery<Product[]>({
+		queryKey: ["products"],
+		queryFn: fetchProduct,
+	});
+	// console.log(data);
+	// if (error) throw new Error("error while fetching data", error);
 
-				if (search !== "") {
-					filteredData = filteredData.filter((item) =>
-						item.name.toLowerCase().includes(search.toLowerCase())
-					);
-				}
+	const filteredProduct = useMemo(() => {
+		const selectedCategories = [];
+		if (toy) selectedCategories.push("toys");
+		if (cloth) selectedCategories.push("clothing");
+		if (beauty) selectedCategories.push("beauty products");
+		if (elect) selectedCategories.push("electronics");
+		if (home) selectedCategories.push("home goods");
 
-				if (toy) {
-					filteredData = filteredData.filter(
-						(item) => item.category === "toys"
-					);
-				}
-				if (cloth) {
-					filteredData = filteredData.filter(
-						(item) => item.category === "clothing"
-					);
-				}
-				if (beauty) {
-					filteredData = filteredData.filter(
-						(item) => item.category === "beauty products"
-					);
-				}
-				if (elect) {
-					filteredData = filteredData.filter(
-						(item) => item.category === "electronics"
-					);
-				}
-				if (home) {
-					filteredData = filteredData.filter(
-						(item) => item.category === "home goods"
-					);
-				}
+		return data?.filter((item) => {
+			if (
+				search !== " " &&
+				!item.name.toLowerCase().includes(search.toLowerCase())
+			) {
+				return false;
+			}
 
-				if (stock) {
-					// setFilter(true)
-					filteredData = filteredData.filter(
-						(item) => item.inStock === true
-					);
-				}
+			if (
+				selectedCategories.length > 0 &&
+				!selectedCategories.includes(item.category)
+			) {
+				return false;
+			}
 
-				if (minPrice !== "" || maxPrice !== "") {
-					// setFilter(true)
-					// setData(getData4Page(filteredData.filter(item => item.price > minPrice && item.price < maxPrice), itemsPerPage))
-					filteredData = filteredData.filter((item) => {
-						const price = parseFloat(item.price.slice(1));
-						if (minPrice !== "" && maxPrice !== "") {
-							return price >= minPrice && price <= maxPrice;
-						} else if (minPrice !== "") {
-							return price >= minPrice;
-						} else if (maxPrice !== "") {
-							return price <= maxPrice;
-						}
+			if (stock && !item.inStock) return false;
 
-						return true;
-					});
-					// let filtered = filteredData[0].price.slice(0,1)
-					// console.log(filtered)
-					// console.log(filteredData[0].price.slice(1))
-					// console.log(minPrice)
-					// console.log(maxPrice)
-					//what i want to do is that i want to match the value of item price and min or max price
-				}
+			const numPrice = parseInt(item.price.split("$")[1]);
 
-				//now the category filter
-				// toys, clothing, beauty products, electronics, homegoods
+			if (minPrice !== "" && numPrice < Number(minPrice)) return false;
+			if (maxPrice !== "" && numPrice > Number(maxPrice)) return false;
+			return true;
+		});
+	}, [
+		data,
+		search,
+		toy,
+		cloth,
+		beauty,
+		elect,
+		home,
+		stock,
+		minPrice,
+		maxPrice,
+	]);
 
-				setAllData(filteredData);
-				setData(getData4Page(filteredData, itemsPerPage));
-				// setFilter(false)
-			})
-			.catch((error) => console.error("Error Fetching JSON:", error));
-	}, [stock, minPrice, maxPrice, toy, cloth, beauty, elect, home, search]);
+	const pages = useMemo(
+		() => (filteredProduct ? getData4Page(filteredProduct, itemsPerPage) : ""),
 
-	const totalPages = data.length;
+		[filteredProduct],
+	);
+	const totalPages = pages.length;
 
-	// console.log(stock)
-	// console.log(data)
-	// console.log(totalPages)
-	// let categories = []
-	// for (let i = 0; i < data.length; i++ ) {
-	//     if (!categories.includes(data[i].category)) {
-	//         categories.push(data[i].category)
-	//         console.log(i)
-	//     }
-	// }
+	useEffect(() => {
+		setPage(1);
+	}, [search, toy, cloth, beauty, elect, home, stock, minPrice, maxPrice]);
 
-	// console.log(categories)
 	//page forward
 	function handleForward() {
 		setPage((prevpage) => prevpage + 1);
@@ -195,7 +186,7 @@ const ProdList = () => {
 	return (
 		<>
 			<div id="toggle" className="hide max-md:block">
-				<FaBars id="bar" className="text-3xl" onClick={handleClick} />
+				<FaFilter id="bar" className="text-3xl" onClick={handleClick} />
 			</div>
 			<div
 				id="filter"
@@ -204,8 +195,8 @@ const ProdList = () => {
 				<header className="text-4xl font-bold mb-2">Filter</header>
 				<div className="flex flex-col gap-2 mb-2">
 					<h2 className="text-lg font-bold py-2">Price</h2>
-					<div className="flex justify-between ml-2">
-						minimum
+					<div className="flex flex-col flex-1 justify-between ml-2">
+						min
 						<input
 							type="number"
 							name="min"
@@ -213,11 +204,11 @@ const ProdList = () => {
 							min="0"
 							max="10"
 							onChange={handleMin}
-							className="w-12 ml-4 ring-1 ring-black"
+							className="w-full ring-1 ring-black"
 						/>
 					</div>
-					<div className="flex justify-between ml-2">
-						maximum
+					<div className="flex flex-col flex-1 justify-between ml-2">
+						max
 						<input
 							type="number"
 							name="max"
@@ -225,7 +216,7 @@ const ProdList = () => {
 							min="0"
 							max="10"
 							onChange={handleMax}
-							className="w-12 ml-4 ring-1 ring-black"
+							className="w-full ring-1 ring-black"
 						/>
 					</div>
 				</div>
@@ -268,7 +259,7 @@ const ProdList = () => {
 						/>
 					</p>
 					<p className="flex justify-between ml-2">
-						homegoods{" "}
+						home goods{" "}
 						<input
 							type="checkbox"
 							name="homegoods"
@@ -289,18 +280,14 @@ const ProdList = () => {
 				</div>
 			</div>
 			<div className="md:w-5/6 w-[365px] m-auto grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4 relative transition-all duration-300">
-				{data[page - 1]?.map((item) => (
+				{pages[page - 1]?.map((item) => (
 					// image, category, name, price
 					<div
 						ref={(el) => (divRef.current[item.id] = el)}
 						key={item.id}
 						className="border border-gray-300 shadow-md"
 					>
-						<img
-							src={item.image}
-							alt="product image"
-							className="w-full"
-						/>
+						<img src={item.image} alt="product icon" className="w-full" />
 						<p className="opacity-45 px-2">{item.category}</p>
 						<Link to={`/product-page/${item.id}`}>
 							<h2
@@ -311,9 +298,7 @@ const ProdList = () => {
 							</h2>
 						</Link>
 
-						<p className="text-red-600 font-bold text-sm px-2">
-							{item.price}
-						</p>
+						<p className="text-red-600 font-bold text-sm px-2">{item.price}</p>
 					</div>
 				))}
 				{/* product bl nk khu shi tl so tr ko thi ma product card a ti  a kya ya mr fik tl */}
@@ -338,6 +323,16 @@ const ProdList = () => {
 					</button>
 				</div>
 			</div>
+
+			{scroll && (
+				<button
+					className="fixed bottom-5 right-5 p-2 hover:ring"
+					type="button"
+					onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+				>
+					<FaArrowUp size={30} />
+				</button>
+			)}
 		</>
 	);
 };
